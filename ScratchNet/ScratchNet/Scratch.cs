@@ -24,6 +24,8 @@ namespace ScratchNet
         {
             udp = new UdpClient();
             destination = new IPEndPoint( IPAddress.Parse( address ), port );
+
+            InitializeMessage();
         }
 
         private void InitializeMessage()
@@ -49,9 +51,9 @@ namespace ScratchNet
             var sizeBytes = new byte[4];
             int len = message.Length;
 
-            sizeBytes[0] =(byte)( len >> 24 );
-            sizeBytes[1] =(byte)( (len << 8) >> 24 );
-            sizeBytes[2] =(byte)( (len << 16) >> 24 );
+            sizeBytes[0] =(byte)(len >> 24);
+            sizeBytes[1] =(byte)((len << 8) >> 24);
+            sizeBytes[2] =(byte)((len << 16) >> 24);
             sizeBytes[3] =(byte)((len << 24) >> 24);
 
             udp.Send( sizeBytes, 4, destination );
