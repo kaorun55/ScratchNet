@@ -11,12 +11,16 @@ namespace ScratchNet
     public class Scratch
     {
         UdpClient udp;
+        //UdpClient udpReceiver;
         IPEndPoint destination;
 
         SensorUpdateBuilder sensorUpdateMessage = new SensorUpdateBuilder();
+        BroadcastBuilder broadcast = new BroadcastBuilder();
+
+        static string localhost = "127.0.0.1";
 
         public Scratch()
-            : this( "127.0.0.1", 42001 )
+            : this( localhost, 42001 )
         {
         }
 
@@ -25,26 +29,39 @@ namespace ScratchNet
             udp = new UdpClient();
             destination = new IPEndPoint( IPAddress.Parse( address ), port );
 
-            InitializeMessage();
+            //Receive();
         }
 
-        private void InitializeMessage()
-        {
-            sensorUpdateMessage.Clear();
-        }
+        //async void Receive()
+        //{
+        //    udpReceiver = new UdpClient( 42001 );
+
+        //    while ( true ) {
+
+        //        var recv = await udp.ReceiveAsync();
+        //        var b = recv.Buffer;
+        //    }
+        //}
 
         public void AddSensorValue( string sensor, string val )
         {
             sensorUpdateMessage.AddMessage( sensor, val );
         }
 
-        public void UpdateSensor()
+        public void SensorUpdate()
         {
             if ( sensorUpdateMessage.Message != "sensor-update" ) {
                 SendMessage( sensorUpdateMessage.Message );
             }
 
-            InitializeMessage();
+            sensorUpdateMessage.Clear();
+        }
+
+        public void Broadcast( string value )
+        {
+            broadcast.AddValue( value );
+            SendMessage( broadcast.Message );
+            broadcast.Clear();
         }
 
         void SendMessage( string message ){

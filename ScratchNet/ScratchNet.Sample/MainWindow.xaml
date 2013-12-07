@@ -3,6 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="MainWindow" Height="350" Width="525">
     <Grid>
-        <Button Click="Button_Click" Content="hoge"/>
+        <StackPanel Orientation="Vertical" >
+            <Button Click="Button_Click" Content="Send Message to hoge" Margin="10"/>
+            <Button Click="Button_Click_1" Content="Broascast to piyo" Margin="10" />
+        </StackPanel>
     </Grid>
 </Window>

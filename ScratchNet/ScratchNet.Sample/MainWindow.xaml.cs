@@ -32,7 +32,13 @@ namespace ScratchNet.Sample
         {
             count++;
             scratch.AddSensorValue( "hoge", count.ToString() );
-            scratch.UpdateSensor();
+            scratch.SensorUpdate();
+        }
+
+        private void Button_Click_1( object sender, RoutedEventArgs e )
+        {
+            scratch.Broadcast( "foo" );
+            scratch.Broadcast( "bar" );
         }
     }
 }

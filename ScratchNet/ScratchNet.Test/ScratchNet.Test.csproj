@@ -52,6 +52,7 @@
   <ItemGroup>
     <Compile Include="SensorUpdateBuilderTest.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BroadcastBuilderTest.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\ScratchNet\ScratchNet.csproj">
