@@ -13,7 +13,7 @@ namespace ScratchNet
         UdpClient udp;
         IPEndPoint destination;
 
-        string sensorUpdateMessage;
+        SensorUpdateBuilder sensorUpdateMessage = new SensorUpdateBuilder();
 
         public Scratch()
             : this( "127.0.0.1", 42001 )
@@ -30,18 +30,18 @@ namespace ScratchNet
 
         private void InitializeMessage()
         {
-            sensorUpdateMessage = "sensor-update";
+            sensorUpdateMessage.Clear();
         }
 
         public void AddSensorValue( string sensor, string val )
         {
-            sensorUpdateMessage += " \"" + sensor + "\" " + val;
+            sensorUpdateMessage.AddMessage( sensor, val );
         }
 
         public void UpdateSensor()
         {
-            if ( sensorUpdateMessage != "sensor-update" ) {
-                SendMessage( sensorUpdateMessage );
+            if ( sensorUpdateMessage.Message != "sensor-update" ) {
+                SendMessage( sensorUpdateMessage.Message );
             }
 
             InitializeMessage();
