@@ -4,6 +4,7 @@
         Title="MainWindow" Height="350" Width="525">
     <Grid>
         <StackPanel Orientation="Vertical" >
+            <Button Click="Button_Click_2" Content="Connect" Margin="10"/>
             <Button Click="Button_Click" Content="Send Message to hoge" Margin="10"/>
             <Button Click="Button_Click_1" Content="Broascast to piyo" Margin="10" />
         </StackPanel>

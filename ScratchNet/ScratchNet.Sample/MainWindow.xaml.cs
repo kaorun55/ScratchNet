@@ -30,15 +30,35 @@ namespace ScratchNet.Sample
 
         private void Button_Click( object sender, RoutedEventArgs e )
         {
-            count++;
-            scratch.AddSensorValue( "hoge", count.ToString() );
-            scratch.SensorUpdate();
+            try {
+                count++;
+                scratch.AddSensorValue( "hoge", count.ToString() );
+                scratch.SensorUpdate();
+            }
+            catch ( Exception ex ) {
+                MessageBox.Show( ex.Message );
+            }
         }
 
         private void Button_Click_1( object sender, RoutedEventArgs e )
         {
-            scratch.Broadcast( "foo" );
-            scratch.Broadcast( "bar" );
+            try {
+                scratch.Broadcast( "foo" );
+                scratch.Broadcast( "bar" );
+            }
+            catch ( Exception ex ) {
+                MessageBox.Show( ex.Message );
+            }
+        }
+
+        private void Button_Click_2( object sender, RoutedEventArgs e )
+        {
+            try {
+                scratch.Connect();
+            }
+            catch ( Exception ex ) {
+                MessageBox.Show( ex.Message );
+            }
         }
     }
 }

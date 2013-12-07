@@ -10,8 +10,7 @@ namespace ScratchNet
 {
     public class Scratch
     {
-        UdpClient udp;
-        //UdpClient udpReceiver;
+        TcpClient client;
         IPEndPoint destination;
 
         SensorUpdateBuilder sensorUpdateMessage = new SensorUpdateBuilder();
@@ -26,10 +25,15 @@ namespace ScratchNet
 
         public Scratch( string address, int port )
         {
-            udp = new UdpClient();
+            client = new TcpClient();
             destination = new IPEndPoint( IPAddress.Parse( address ), port );
 
             //Receive();
+        }
+
+        public void Connect()
+        {
+            client.Connect( destination );
         }
 
         //async void Receive()
@@ -64,7 +68,11 @@ namespace ScratchNet
             broadcast.Clear();
         }
 
-        void SendMessage( string message ){
+        async void SendMessage( string message ){
+            if ( !client.Connected ) {
+                throw new Exception( "Not connected to Scratch." );
+            }
+
             var sizeBytes = new byte[4];
             int len = message.Length;
 
@@ -73,10 +81,11 @@ namespace ScratchNet
             sizeBytes[2] =(byte)((len << 16) >> 24);
             sizeBytes[3] =(byte)((len << 24) >> 24);
 
-            udp.Send( sizeBytes, 4, destination );
+            var stream = client.GetStream();
+            await stream.WriteAsync( sizeBytes, 0, 4 );
 
             var m = Encoding.UTF8.GetBytes( message );
-            udp.Send( m, m.Length, destination );
+            await stream.WriteAsync( m, 0, m.Length );
         }
     }
 }
