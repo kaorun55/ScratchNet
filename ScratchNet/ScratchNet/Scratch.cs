@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace ScratchNet
@@ -27,25 +28,39 @@ namespace ScratchNet
         {
             client = new TcpClient();
             destination = new IPEndPoint( IPAddress.Parse( address ), port );
-
-            //Receive();
         }
 
-        public void Connect()
+        public async void Connect()
         {
-            client.Connect( destination );
+            await client.ConnectAsync( destination.Address, destination.Port );
+            Receive();
         }
 
-        //async void Receive()
-        //{
-        //    udpReceiver = new UdpClient( 42001 );
+        void Receive()
+        {
+            var thread = new Thread( () =>
+            {
+                while ( true ) {
+                    var stream  =client.GetStream();
 
-        //    while ( true ) {
+                    byte[] size = new byte[4];
+                    stream.ReadAsync( size, 0, size.Count() );
 
-        //        var recv = await udp.ReceiveAsync();
-        //        var b = recv.Buffer;
-        //    }
-        //}
+                    int count = ((int)size[3]) + ((int)size[2] << 8) + ((int)size[1] << 16) + ((int)size[0] << 24);
+                    if ( count == 0 ) {
+                        continue;
+                    }
+
+                    byte[] message  = new byte[count];
+                    stream.ReadAsync( message, 0, message.Count() );
+
+                    var m = Encoding.UTF8.GetString( message );
+                    var c = m.Count();
+                }
+            } );
+
+            thread.Start();
+        }
 
         public void AddSensorValue( string sensor, string val )
         {

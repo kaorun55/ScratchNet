@@ -43,7 +43,6 @@ namespace ScratchNet.Sample
         private void Button_Click_1( object sender, RoutedEventArgs e )
         {
             try {
-                scratch.Broadcast( "foo" );
                 scratch.Broadcast( "bar" );
             }
             catch ( Exception ex ) {
