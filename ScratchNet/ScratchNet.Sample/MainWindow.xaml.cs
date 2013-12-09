@@ -26,6 +26,13 @@ namespace ScratchNet.Sample
         public MainWindow()
         {
             InitializeComponent();
+
+            Closing+= MainWindow_Closing;
+        }
+
+        void MainWindow_Closing( object sender, System.ComponentModel.CancelEventArgs e )
+        {
+            scratch.Close();
         }
 
         private void Button_Click( object sender, RoutedEventArgs e )

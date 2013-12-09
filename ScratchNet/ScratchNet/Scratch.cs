@@ -19,6 +19,15 @@ namespace ScratchNet
 
         static string localhost = "127.0.0.1";
 
+        Thread thread;
+        bool isRunning = true;
+
+        public delegate void BroadcastEvent( object sender, string value );
+        public event BroadcastEvent OnBroadcast;
+
+        public delegate void SensorUpdateEvent( object sender, Dictionary<string, string> value );
+        public event SensorUpdateEvent OnSensorUpdate;
+
         public Scratch()
             : this( localhost, 42001 )
         {
@@ -32,30 +41,65 @@ namespace ScratchNet
 
         public async void Connect()
         {
+            if ( client.Connected ) {
+                return;
+            }
+
             await client.ConnectAsync( destination.Address, destination.Port );
             Receive();
         }
 
+        public void Close()
+        {
+            if ( !client.Connected ) {
+                return;
+            }
+
+            isRunning = false;
+            client.Close();
+
+            if ( thread != null ) {
+                thread.Join();
+                thread = null;
+            }
+        }
+
         void Receive()
         {
-            var thread = new Thread( () =>
+            thread = new Thread( () =>
             {
-                while ( true ) {
-                    var stream  =client.GetStream();
+                try {
+                    isRunning = true;
+                    while ( isRunning ) {
+                        var stream = client.GetStream();
 
-                    byte[] size = new byte[4];
-                    stream.Read( size, 0, size.Count() );
+                        byte[] size = new byte[4];
+                        stream.Read( size, 0, size.Count() );
 
-                    int count = ((int)size[3]) + ((int)size[2] << 8) + ((int)size[1] << 16) + ((int)size[0] << 24);
-                    if ( count == 0 ) {
-                        continue;
+                        int count = ((int)size[3]) + ((int)size[2] << 8) + ((int)size[1] << 16) + ((int)size[0] << 24);
+                        if ( count == 0 ) {
+                            continue;
+                        }
+
+                        byte[] buffer  = new byte[count];
+                        stream.Read( buffer, 0, buffer.Count() );
+
+                        var message = Encoding.UTF8.GetString( buffer );
+                        if ( BroadcastParser.IsValid( message ) ) {
+                            var value = BroadcastParser.Parse( message );
+                            if ( OnBroadcast != null ) {
+                                OnBroadcast( this, value );
+                            }
+                        }
+                        else if ( SensorUpdateParser.IsValid( message ) ) {
+                            var value = SensorUpdateParser.Parse( message );
+                            if ( OnSensorUpdate != null ) {
+                                OnSensorUpdate( this, value );
+                            }
+                        }
                     }
-
-                    byte[] message  = new byte[count];
-                    stream.ReadAsync( message, 0, message.Count() );
-
-                    var m = Encoding.UTF8.GetString( message );
-                    var c = m.Count();
+                }
+                catch ( Exception ) {
                 }
             } );
 
