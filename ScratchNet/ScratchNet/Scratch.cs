@@ -28,6 +28,8 @@ namespace ScratchNet
         public delegate void SensorUpdateEvent( object sender, Dictionary<string, string> value );
         public event SensorUpdateEvent OnSensorUpdate;
 
+        SynchronizationContext context = SynchronizationContext.Current;
+
         public Scratch()
             : this( localhost, 42001 )
         {
@@ -86,16 +88,22 @@ namespace ScratchNet
 
                         var message = Encoding.UTF8.GetString( buffer );
                         if ( BroadcastParser.IsValid( message ) ) {
-                            var value = BroadcastParser.Parse( message );
-                            if ( OnBroadcast != null ) {
-                                OnBroadcast( this, value );
-                            }
+                            context.Post( _ =>
+                            {
+                                var value = BroadcastParser.Parse( message );
+                                if ( OnBroadcast != null ) {
+                                    OnBroadcast( this, value );
+                                }
+                            }, null );
                         }
                         else if ( SensorUpdateParser.IsValid( message ) ) {
-                            var value = SensorUpdateParser.Parse( message );
-                            if ( OnSensorUpdate != null ) {
-                                OnSensorUpdate( this, value );
-                            }
+                            context.Post( _ =>
+                            {
+                                var value = SensorUpdateParser.Parse( message );
+                                if ( OnSensorUpdate != null ) {
+                                    OnSensorUpdate( this, value );
+                                }
+                            }, null );
                         }
                     }
                 }

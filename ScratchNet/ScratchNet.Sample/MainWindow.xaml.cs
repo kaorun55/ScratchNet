@@ -27,7 +27,31 @@ namespace ScratchNet.Sample
         {
             InitializeComponent();
 
+            Loaded += MainWindow_Loaded;
             Closing+= MainWindow_Closing;
+        }
+
+        void MainWindow_Loaded( object sender, RoutedEventArgs e )
+        {
+            scratch.OnBroadcast += scratch_OnBroadcast;
+            scratch.OnSensorUpdate += scratch_OnSensorUpdate;
+
+            ListReceive.Items.Add( "hoge" );
+        }
+
+        void scratch_OnBroadcast( object sender, string value )
+        {
+            ListReceive.Items.Add( value );
+        }
+
+        void scratch_OnSensorUpdate( object sender, Dictionary<string, string> value )
+        {
+            string v = "";
+            foreach ( var val in value ) {
+                v += string.Format( "{0},{1} ", val.Key, val.Value );
+            }
+
+            ListReceive.Items.Add( v );
         }
 
         void MainWindow_Closing( object sender, System.ComponentModel.CancelEventArgs e )
