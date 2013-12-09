@@ -22,7 +22,7 @@ namespace ScratchNet.Test
         [TestMethod]
         public void broadcastしかなくてIsValidがfalse()
         {
-            Assert.IsTrue( BroadcastParser.IsValid( "broadcast " ) );
+            Assert.IsFalse( BroadcastParser.IsValid( "broadcast " ) );
         }
 
         [TestMethod]
