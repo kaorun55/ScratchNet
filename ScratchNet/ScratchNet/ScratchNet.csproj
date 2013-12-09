@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BroadcastBuilder.cs" />
+    <Compile Include="BroadcastParser.cs" />
     <Compile Include="SensorUpdateBuilder.cs" />
     <Compile Include="Scratch.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
