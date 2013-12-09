@@ -44,7 +44,7 @@ namespace ScratchNet
                     var stream  =client.GetStream();
 
                     byte[] size = new byte[4];
-                    stream.ReadAsync( size, 0, size.Count() );
+                    stream.Read( size, 0, size.Count() );
 
                     int count = ((int)size[3]) + ((int)size[2] << 8) + ((int)size[1] << 16) + ((int)size[0] << 24);
                     if ( count == 0 ) {
