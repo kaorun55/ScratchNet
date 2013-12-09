@@ -15,6 +15,16 @@ namespace ScratchNet.Test
         }
 
         [TestMethod]
+        public void Parse2()
+        {
+            var value = SensorUpdateParser.Parse( "sensor-update \"hoge\" 2 \"piyo\" 75 " );
+            Assert.IsTrue( value.ContainsKey( "hoge" ) );
+            Assert.AreEqual( "2", value["hoge"] );
+            Assert.IsTrue( value.ContainsKey( "piyo" ) );
+            Assert.AreEqual( "75", value["piyo"] );
+        }
+
+        [TestMethod]
         public void IsValid()
         {
             Assert.IsTrue( SensorUpdateParser.IsValid( "sensor-update \"piyo\" 76 " ) );
