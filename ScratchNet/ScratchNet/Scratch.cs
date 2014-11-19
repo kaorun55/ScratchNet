@@ -11,7 +11,7 @@ namespace ScratchNet
 {
     public class Scratch
     {
-        TcpClient client;
+        UdpClient client;
         IPEndPoint destination;
 
         SensorUpdateBuilder sensorUpdateMessage = new SensorUpdateBuilder();
@@ -37,28 +37,18 @@ namespace ScratchNet
 
         public Scratch( string address, int port )
         {
-            client = new TcpClient();
             destination = new IPEndPoint( IPAddress.Parse( address ), port );
+            client = new UdpClient();
         }
 
-        public async void Connect()
+        public void Connect()
         {
-            if ( client.Connected ) {
-                return;
-            }
-
-            await client.ConnectAsync( destination.Address, destination.Port );
             Receive();
         }
 
         public void Close()
         {
-            if ( !client.Connected ) {
-                return;
-            }
-
             isRunning = false;
-            client.Close();
 
             if ( thread != null ) {
                 thread.Join();
@@ -72,40 +62,41 @@ namespace ScratchNet
             {
                 try {
                     isRunning = true;
-                    while ( isRunning ) {
-                        var stream = client.GetStream();
+                    //while ( isRunning ) {
+                    //    var result = await client.ReceiveAsync();
 
-                        byte[] size = new byte[4];
-                        stream.Read( size, 0, size.Count() );
+                    //    byte[] size = new byte[4];
+                    //    result.Buffer
+                    //    stream.Read( size, 0, size.Count() );
 
-                        int count = ((int)size[3]) + ((int)size[2] << 8) + ((int)size[1] << 16) + ((int)size[0] << 24);
-                        if ( count == 0 ) {
-                            continue;
-                        }
+                    //    int count = ((int)size[3]) + ((int)size[2] << 8) + ((int)size[1] << 16) + ((int)size[0] << 24);
+                    //    if ( count == 0 ) {
+                    //        continue;
+                    //    }
 
-                        byte[] buffer  = new byte[count];
-                        stream.Read( buffer, 0, buffer.Count() );
+                    //    byte[] buffer  = new byte[count];
+                    //    stream.Read( buffer, 0, buffer.Count() );
 
-                        var message = Encoding.UTF8.GetString( buffer );
-                        if ( BroadcastParser.IsValid( message ) ) {
-                            context.Post( _ =>
-                            {
-                                var value = BroadcastParser.Parse( message );
-                                if ( OnBroadcast != null ) {
-                                    OnBroadcast( this, value );
-                                }
-                            }, null );
-                        }
-                        else if ( SensorUpdateParser.IsValid( message ) ) {
-                            context.Post( _ =>
-                            {
-                                var value = SensorUpdateParser.Parse( message );
-                                if ( OnSensorUpdate != null ) {
-                                    OnSensorUpdate( this, value );
-                                }
-                            }, null );
-                        }
-                    }
+                    //    var message = Encoding.UTF8.GetString( buffer );
+                    //    if ( BroadcastParser.IsValid( message ) ) {
+                    //        context.Post( _ =>
+                    //        {
+                    //            var value = BroadcastParser.Parse( message );
+                    //            if ( OnBroadcast != null ) {
+                    //                OnBroadcast( this, value );
+                    //            }
+                    //        }, null );
+                    //    }
+                    //    else if ( SensorUpdateParser.IsValid( message ) ) {
+                    //        context.Post( _ =>
+                    //        {
+                    //            var value = SensorUpdateParser.Parse( message );
+                    //            if ( OnSensorUpdate != null ) {
+                    //                OnSensorUpdate( this, value );
+                    //            }
+                    //        }, null );
+                    //    }
+                    //}
                 }
                 catch ( Exception ) {
                 }
@@ -135,11 +126,7 @@ namespace ScratchNet
             broadcast.Clear();
         }
 
-        async void SendMessage( string message ){
-            if ( !client.Connected ) {
-                throw new Exception( "Not connected to Scratch." );
-            }
-
+        void SendMessage( string message ){
             var sizeBytes = new byte[4];
             int len = message.Length;
 
@@ -147,12 +134,10 @@ namespace ScratchNet
             sizeBytes[1] =(byte)((len << 8) >> 24);
             sizeBytes[2] =(byte)((len << 16) >> 24);
             sizeBytes[3] =(byte)((len << 24) >> 24);
-
-            var stream = client.GetStream();
-            await stream.WriteAsync( sizeBytes, 0, 4 );
+            client.SendAsync(sizeBytes, 4, destination );
 
             var m = Encoding.UTF8.GetBytes( message );
-            await stream.WriteAsync( m, 0, m.Length );
+            client.SendAsync( m, m.Length, destination );
         }
     }
 }
